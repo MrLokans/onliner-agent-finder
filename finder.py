@@ -5,9 +5,7 @@ from typing import Generator
 import requests
 
 from config import (
-    RENT_TYPE,
     SEARCH_BASE_URL,
-    URL_FILE,
     MINSK_BOUND_COORDINTATES,
     LAT_INDEX, LONG_INDEX
 )
@@ -73,37 +71,79 @@ class Apartment(object):
         return self.__repr__()
 
 
-def build_url_bounds_params(bound: dict) -> dict:
+def build_url_bounds_params(bound: dict = MINSK_BOUND_COORDINTATES) -> dict:
     params = {}
-    params['[lb][lat]'] = MINSK_BOUND_COORDINTATES['lb'][LAT_INDEX]
-    params['[lb][long]'] = MINSK_BOUND_COORDINTATES['lb'][LONG_INDEX]
-    params['[rt][lat]'] = MINSK_BOUND_COORDINTATES['rt'][LAT_INDEX]
-    params['[rt][long]'] = MINSK_BOUND_COORDINTATES['rt'][LONG_INDEX]
+    params['[lb][lat]'] = bound['lb'][LAT_INDEX]
+    params['[lb][long]'] = bound['lb'][LONG_INDEX]
+    params['[rt][lat]'] = bound['rt'][LAT_INDEX]
+    params['[rt][long]'] = bound['rt'][LONG_INDEX]
     return params
+
+
+def get_average_from_two_points(p1, p2):
+    return (
+        (float(p1[LAT_INDEX]) + float(p2[LAT_INDEX])) / 2.0,
+        (float(p1[LONG_INDEX]) + float(p2[LONG_INDEX])) / 2.0
+    )
+
+
+def get_squares_from_minsk_coordinates():
+    left_bottom_point = MINSK_BOUND_COORDINTATES['lb']
+    right_top_point = MINSK_BOUND_COORDINTATES['rt']
+    right_bottom_point = (right_top_point[LAT_INDEX], left_bottom_point[LONG_INDEX])
+    left_top_point = (left_bottom_point[LAT_INDEX], right_top_point[LONG_INDEX])
+
+    center_point = get_average_from_two_points(right_top_point, left_bottom_point)
+
+    right_top_square = {
+        'rt': right_top_point,
+        'lb': center_point
+    }
+
+    left_top_square = {
+        'rt': get_average_from_two_points(left_top_point, right_top_point),
+        'lb': get_average_from_two_points(left_top_point, left_bottom_point)
+    }
+
+    right_bottom_square = {
+        'rt': get_average_from_two_points(right_top_point, right_bottom_point),
+        'lb': get_average_from_two_points(left_bottom_point, right_bottom_point)
+    }
+
+    left_bottom_square = {
+        'rt': center_point,
+        'lb': left_bottom_point
+    }
+
+    return left_top_square, right_top_square, left_bottom_square, right_bottom_square
 
 
 def get_available_apartments() -> Generator[Apartment, None, None]:
     session = requests.Session()
-    payload = build_url_bounds_params(MINSK_BOUND_COORDINTATES)
-    payload.update({'only_owner': 'true'})
 
-    req = session.get(SEARCH_BASE_URL, params=payload)
-    req = req.json()
+    squares = get_squares_from_minsk_coordinates()
 
-    total_pages = req['page']['last']
+    payloads = [build_url_bounds_params(square) for square in squares]
+    [payload.update({'only_owner': 'true'}) for payload in payloads]
 
-    for i in range(2, total_pages + 1):
-        payload.update({'page': i})
-        resp = session.get(SEARCH_BASE_URL, params=payload)
-        for ap in resp.json()['apartments']:
-            data = ap.copy()
-            data.update({'origin_url': resp.url})
-            yield Apartment.from_dict(data)
+    for payload in payloads:
+        req = session.get(SEARCH_BASE_URL, params=payload)
+        req = req.json()
+
+        total_pages = req['page']['last']
+
+        for i in range(2, total_pages + 1):
+            payload.update({'page': i})
+            resp = session.get(SEARCH_BASE_URL, params=payload)
+            for ap in resp.json()['apartments']:
+                data = ap.copy()
+                data.update({'origin_url': resp.url})
+                yield Apartment.from_dict(data)
 
 
 def main():
     url_cache = set()
-    with open('apartment_urls.txt', 'w') as f:
+    with open('apartment_urls.txt', 'w+') as f:
         for ap in get_available_apartments():
             if ap.url in url_cache:
                 continue
