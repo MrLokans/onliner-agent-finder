@@ -1,0 +1,11 @@
+{
+    "name": "Mr. Agent",
+    "profile_url": "https://www.some-url.com",
+    "is_agent_probability": "100",
+    "posts": [
+        "https://posts.com/post1",
+        "https://posts.com/post2",
+        "https://posts.com/post3",
+        "https://posts.com/post4"
+    ]
+}
