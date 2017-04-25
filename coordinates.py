@@ -1,6 +1,7 @@
 from typing import List
 
 from config import LAT_INDEX, LONG_INDEX
+from utils import are_floats_equal
 
 
 class Point(object):
@@ -14,6 +15,11 @@ class Point(object):
 
     def __str__(self):
         return self.__repr__()
+
+    def __eq__(self, other):
+        latitude_equal = are_floats_equal(self.latitude, other.latitude)
+        longitude_equal = are_floats_equal(self.longitude, other.longitude)
+        return latitude_equal and longitude_equal
 
 
 class CoordinateRectangle(object):
@@ -60,3 +66,14 @@ class CoordinateRectangle(object):
             'bounds[rt][lat]': self.right_top.latitude,
             'bounds[rt][long]': self.right_top.longitude,
         }
+
+    def __eq__(self, other):
+        """
+        Two rectangles are considered equal if
+        their left bottom and right top coordinates
+        are equal
+        """
+        if not isinstance(other, CoordinateRectangle):
+            return False
+        return self.left_bottom == other.left_bottom \
+            and self.right_top == other.right_top
