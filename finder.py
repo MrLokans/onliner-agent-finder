@@ -33,7 +33,7 @@ def get_available_apartments(coordinate_rectangle: CoordinateRectangle) -> Gener
             yield Apartment.from_dict(data)
 
 
-def get_apartment_urls():
+def get_apartment_urls() -> Generator[str, None, None]:
     url_cache = set()
     coordinate_rectangle = CoordinateRectangle.from_dict(MINSK_BOUND_COORDINTATES)
     for coord in coordinate_rectangle.get_rectangles(6, 6):
