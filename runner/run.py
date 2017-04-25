@@ -11,17 +11,21 @@ logger = logging.getLogger(__name__)
 
 
 OUTPUT_FILE = 'bulletins.json'
-OUPTUT_FORMAT = OUTPUT_FILE.split('.')[-1]
+OUTPUT_FORMAT = OUTPUT_FILE.split('.')[-1]
 
 
-if __name__ == '__main__':
-    overriden_settings = {
-        'FEED_FORMAT': OUPTUT_FORMAT,
+def main():
+    overridden_settings = {
+        'FEED_FORMAT': OUTPUT_FORMAT,
         'FEED_URI': OUTPUT_FILE,
         'SPIDER_LOADER_WARN_ONLY': True,
         'LOG_LEVEL': 'INFO',
     }
-    process = CrawlerProcess(overriden_settings)
+    process = CrawlerProcess(overridden_settings)
 
     process.crawl(OnlinerApartmentSpider)
     process.start()
+
+
+if __name__ == '__main__':
+    main()
