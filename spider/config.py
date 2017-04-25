@@ -10,3 +10,4 @@ MINSK_BOUND_COORDINTATES = {
     # Right top corner
     'rt': ('54.01559842227507', '27.86870368988288')
 }
+CACHE_FILENAME = 'spider_url_cache.pickle'
