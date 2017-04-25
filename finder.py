@@ -3,11 +3,11 @@ from typing import Generator
 
 import requests
 
-
 from apartments import Apartment
 from config import (
     SEARCH_BASE_URL,
     MINSK_BOUND_COORDINTATES,
+    URL_FILE
 )
 from coordinates import CoordinateRectangle
 
@@ -25,26 +25,29 @@ def get_available_apartments(coordinate_rectangle: CoordinateRectangle) -> Gener
     total_pages = req['page']['last']
 
     for i in range(1, total_pages + 1):
-            payload.update({'page': i})
-            resp = session.get(SEARCH_BASE_URL, params=payload)
-            for ap in resp.json()['apartments']:
-                data = ap.copy()
-                data.update({'origin_url': resp.url})
-                yield Apartment.from_dict(data)
+        payload.update({'page': i})
+        resp = session.get(SEARCH_BASE_URL, params=payload)
+        for ap in resp.json()['apartments']:
+            data = ap.copy()
+            data.update({'origin_url': resp.url})
+            yield Apartment.from_dict(data)
+
+
+def get_apartment_urls():
+    url_cache = set()
+    coordinate_rectangle = CoordinateRectangle.from_dict(MINSK_BOUND_COORDINTATES)
+    for coord in coordinate_rectangle.get_rectangles(6, 6):
+        for ap in get_available_apartments(coord):
+            if ap.url in url_cache:
+                continue
+            url_cache.add(ap.url)
+            yield ap.url
 
 
 def main():
-    url_cache = set()
-    with open('apartment_urls.txt', 'w+') as f:
-        coordinate_rectangle = CoordinateRectangle\
-            .from_dict(MINSK_BOUND_COORDINTATES)
-        for coord in coordinate_rectangle.get_rectangles(6, 6):
-            for ap in get_available_apartments(coord):
-                if ap.url in url_cache:
-                    continue
-                f.write(ap.url)
-                f.write('\n')
-                url_cache.add(ap.url)
+    with open(URL_FILE, 'w+') as f:
+        for url in get_apartment_urls():
+            f.write('{}\n'.format(url))
 
 
 if __name__ == '__main__':
