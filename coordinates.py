@@ -28,22 +28,23 @@ class CoordinateRectangle(object):
         self.left_bottom = left_bottom
         self.right_top = right_top
 
-    def get_rectangles(self, n: int=2, k: int=2) -> List['CoordinateRectangle']:
+    def get_rectangles(self,
+                       cols: int=2,
+                       rows: int=2) -> List['CoordinateRectangle']:
         """
-        Split the given rectangle into n*k rectangles with the same square
-
+        Split the given rectangle into cols*rows rectangles with the same square
         """
         rectangles = []
 
-        longitude_step = abs(self.left_bottom.longitude - self.right_top.longitude) / n
-        latitude_step = abs(self.left_bottom.latitude - self.right_top.latitude) / k
+        longitude_step = (self.right_top.longitude - self.left_bottom.longitude) / rows
+        latitude_step = (self.right_top.latitude - self.left_bottom.latitude) / cols
 
-        for y in range(n):
-            for x in range(k):
-                lb = Point(self.left_bottom.latitude + x * latitude_step,
-                           self.right_top.longitude + y * longitude_step)
-                rt = Point(self.left_bottom.latitude + (x + 1) * latitude_step,
-                           self.right_top.longitude + (y + 1) * longitude_step)
+        for row in range(rows):
+            for col in range(cols):
+                lb = Point(self.left_bottom.latitude + col * latitude_step,
+                           self.left_bottom.longitude + row * longitude_step)
+                rt = Point(self.left_bottom.latitude + (col + 1) * latitude_step,
+                           self.left_bottom.longitude + (row + 1) * longitude_step)
                 rectangles.append(CoordinateRectangle(lb, rt))
         return rectangles
 
