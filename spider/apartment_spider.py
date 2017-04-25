@@ -1,10 +1,14 @@
+import os
+import sys
+
 import scrapy
 from scrapy.loader import processors, ItemLoader
 
-from config import URL_FILE
-
-
 from items import ApartmentBulletin
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.abspath(os.path.join(BASE_DIR, '..')))
+from config import URL_FILE
 
 
 class BulletinLoader(ItemLoader):
