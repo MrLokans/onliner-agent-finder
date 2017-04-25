@@ -4,7 +4,7 @@ import sys
 import scrapy
 from scrapy.loader import processors, ItemLoader
 
-from items import ApartmentBulletin
+from spider.items import ApartmentBulletin
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.abspath(os.path.join(BASE_DIR, '..')))
@@ -28,9 +28,9 @@ class OnlinerApartmentSpider(scrapy.Spider):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.start_urls = self._read_start_urls()
+        self.start_urls = self._get_start_urls()
 
-    def _read_start_urls(self):
+    def _get_start_urls(self):
         urls = []
         with open(URL_FILE) as f:
             urls = f.readlines()
