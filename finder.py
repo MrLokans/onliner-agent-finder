@@ -38,7 +38,7 @@ def main():
     with open('apartment_urls.txt', 'w+') as f:
         coordinate_rectangle = CoordinateRectangle\
             .from_dict(MINSK_BOUND_COORDINTATES)
-        for coord in coordinate_rectangle.get_rectangles():
+        for coord in coordinate_rectangle.get_rectangles(6, 6):
             for ap in get_available_apartments(coord):
                 if ap.url in url_cache:
                     continue
