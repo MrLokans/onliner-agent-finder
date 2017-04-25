@@ -1,5 +1,5 @@
 import logging
-from typing import Generator
+from typing import Iterable
 
 import requests
 
@@ -15,7 +15,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-def get_available_apartments(coordinate_rectangle: CoordinateRectangle) -> Generator[Apartment, None, None]:
+def get_available_apartments(coordinate_rectangle: CoordinateRectangle) -> Iterable[Apartment]:
     session = requests.Session()
     payload = coordinate_rectangle.to_url_params()
 
@@ -33,7 +33,7 @@ def get_available_apartments(coordinate_rectangle: CoordinateRectangle) -> Gener
             yield Apartment.from_dict(data)
 
 
-def get_apartment_urls():
+def get_apartment_urls() -> Iterable[str]:
     url_cache = set()
     coordinate_rectangle = CoordinateRectangle.from_dict(MINSK_BOUND_COORDINTATES)
     for coord in coordinate_rectangle.get_rectangles(6, 6):
