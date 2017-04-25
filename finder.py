@@ -1,11 +1,13 @@
 import datetime
 import logging
-from typing import Generator
+from typing import Generator, List
 
 import requests
 
 from config import (
+	RENT_TYPE,
     SEARCH_BASE_URL,
+	URL_FILE,
     MINSK_BOUND_COORDINTATES,
     LAT_INDEX, LONG_INDEX
 )
@@ -16,6 +18,65 @@ logger = logging.getLogger(__name__)
 
 class ApartmentIsNotFound(Exception):
     pass
+
+
+class Point(object):
+
+    def __init__(self, latitude, longitude):
+        self.latitude = float(latitude)
+        self.longitude = float(longitude)
+
+    def __repr__(self):
+        return 'Point({}, {})'.format(self.latitude, self.longitude)
+
+    def __str__(self):
+        return self.__repr__()
+
+
+class CoordinateRectangle(object):
+
+    def __init__(self, left_bottom: Point, right_top: Point):
+        self.left_bottom = left_bottom
+        self.right_top = right_top
+
+    def get_rectangles(self, n: int=2, k: int=2) -> List['CoordinateRectangle']:
+        """
+        Split the given rectangle into n*k rectangles with the same square
+
+        """
+        rectangles = []
+
+        longitude_step = abs(self.left_bottom.longitude - self.right_top.longitude) / n
+        latitude_step = abs(self.left_bottom.latitude - self.right_top.latitude) / k
+
+        for y in range(n):
+            for x in range(k):
+                lb = Point(self.left_bottom.latitude + x * latitude_step,
+                           self.right_top.longitude + y * longitude_step)
+                rt = Point(self.left_bottom.latitude + (x + 1) * latitude_step,
+                           self.right_top.longitude + (y + 1) * longitude_step)
+                rectangles.append(CoordinateRectangle(lb, rt))
+        return rectangles
+
+    def __repr__(self):
+        return 'CoordinateRectangle({0}, {1})'.format(self.left_bottom, self.right_top)
+
+    def __str__(self):
+        return self.__repr__()
+
+    @classmethod
+    def from_dict(cls, d):
+        lb = Point(d['lb'][LAT_INDEX], d['lb'][LONG_INDEX])
+        rt = Point(d['rt'][LAT_INDEX], d['rt'][LONG_INDEX])
+        return cls(lb, rt)
+
+    def to_url_params(self):
+        return {
+            'bounds[lb][lat]': self.left_bottom.latitude,
+            'bounds[lb][long]': self.left_bottom.longitude,
+            'bounds[rt][lat]': self.right_top.latitude,
+            'bounds[rt][long]': self.right_top.longitude,
+        }
 
 
 class Apartment(object):
@@ -71,56 +132,16 @@ class Apartment(object):
         return self.__repr__()
 
 
-def build_url_bounds_params(bound: dict = MINSK_BOUND_COORDINTATES) -> dict:
-    params = {}
-    params['[lb][lat]'] = bound['lb'][LAT_INDEX]
-    params['[lb][long]'] = bound['lb'][LONG_INDEX]
-    params['[rt][lat]'] = bound['rt'][LAT_INDEX]
-    params['[rt][long]'] = bound['rt'][LONG_INDEX]
-    return params
+def build_url_bounds_params(bound: dict) -> dict:
+    params['[lb][lat]'] = MINSK_BOUND_COORDINTATES['lb'][LAT_INDEX]
+    params['[lb][long]'] = MINSK_BOUND_COORDINTATES['lb'][LONG_INDEX]
+    params['[rt][lat]'] = MINSK_BOUND_COORDINTATES['rt'][LAT_INDEX]
+    params['[rt][long]'] = MINSK_BOUND_COORDINTATES['rt'][LONG_INDEX]
 
 
-def get_average_from_two_points(p1, p2):
-    return (
-        (float(p1[LAT_INDEX]) + float(p2[LAT_INDEX])) / 2.0,
-        (float(p1[LONG_INDEX]) + float(p2[LONG_INDEX])) / 2.0
-    )
-
-
-def get_squares_from_minsk_coordinates():
-    left_bottom_point = MINSK_BOUND_COORDINTATES['lb']
-    right_top_point = MINSK_BOUND_COORDINTATES['rt']
-    right_bottom_point = (right_top_point[LAT_INDEX], left_bottom_point[LONG_INDEX])
-    left_top_point = (left_bottom_point[LAT_INDEX], right_top_point[LONG_INDEX])
-
-    center_point = get_average_from_two_points(right_top_point, left_bottom_point)
-
-    right_top_square = {
-        'rt': right_top_point,
-        'lb': center_point
-    }
-
-    left_top_square = {
-        'rt': get_average_from_two_points(left_top_point, right_top_point),
-        'lb': get_average_from_two_points(left_top_point, left_bottom_point)
-    }
-
-    right_bottom_square = {
-        'rt': get_average_from_two_points(right_top_point, right_bottom_point),
-        'lb': get_average_from_two_points(left_bottom_point, right_bottom_point)
-    }
-
-    left_bottom_square = {
-        'rt': center_point,
-        'lb': left_bottom_point
-    }
-
-    return left_top_square, right_top_square, left_bottom_square, right_bottom_square
-
-
-def get_available_apartments() -> Generator[Apartment, None, None]:
+def get_available_apartments(coordinate_rectangle: CoordinateRectangle) -> Generator[Apartment, None, None]:
     session = requests.Session()
-
+    payload = coordinate_rectangle.to_url_params()
     squares = get_squares_from_minsk_coordinates()
 
     payloads = [build_url_bounds_params(square) for square in squares]
@@ -132,7 +153,7 @@ def get_available_apartments() -> Generator[Apartment, None, None]:
 
         total_pages = req['page']['last']
 
-        for i in range(2, total_pages + 1):
+    for i in range(1, total_pages + 1):
             payload.update({'page': i})
             resp = session.get(SEARCH_BASE_URL, params=payload)
             for ap in resp.json()['apartments']:
@@ -144,12 +165,15 @@ def get_available_apartments() -> Generator[Apartment, None, None]:
 def main():
     url_cache = set()
     with open('apartment_urls.txt', 'w+') as f:
-        for ap in get_available_apartments():
-            if ap.url in url_cache:
-                continue
-            f.write(ap.url)
-            f.write('\n')
-            url_cache.add(ap.url)
+        coordinate_rectangle = CoordinateRectangle\
+            .from_dict(MINSK_BOUND_COORDINTATES)
+        for coord in coordinate_rectangle.get_rectangles():
+            for ap in get_available_apartments(coord):
+                if ap.url in url_cache:
+                    continue
+                f.write(ap.url)
+                f.write('\n')
+                url_cache.add(ap.url)
 
 
 if __name__ == '__main__':
