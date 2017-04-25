@@ -1,14 +1,14 @@
 import os
-import sys
+import logging
 
 import scrapy
 from scrapy.loader import processors, ItemLoader
 
-from spider.items import ApartmentBulletin
+from finder import get_apartment_urls
+from items import ApartmentBulletin
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.abspath(os.path.join(BASE_DIR, '..')))
-from config import URL_FILE
+
+logger = logging.getLogger(__name__)
 
 
 class BulletinLoader(ItemLoader):
@@ -31,10 +31,17 @@ class OnlinerApartmentSpider(scrapy.Spider):
         self.start_urls = self._get_start_urls()
 
     def _get_start_urls(self):
-        urls = []
-        with open(URL_FILE) as f:
-            urls = f.readlines()
-            urls = [u.strip() for u in urls]
+        use_file = os.environ.get('SPIDER_USE_URL_FILE')
+        cache_file = os.environ.get('SPIDER_URL_FILE')
+        if use_file and cache_file:
+            logger.info("Using URL file %s", cache_file)
+            urls = []
+            with open(cache_file) as f:
+                urls = f.readlines()
+                urls = [u.strip() for u in urls]
+        else:
+            logger.info("Obtaining URL from onliner website")
+            urls = list(get_apartment_urls())
         return urls
 
     def parse(self, response):
