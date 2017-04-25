@@ -34,9 +34,9 @@ class OnlinerApartmentSpider(scrapy.Spider):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.start_urls = self._get_start_urls()
         self.cache_manager = URLCacheManager()
         self.cache_manager.load_cache()
+        self.start_urls = self._get_start_urls()
 
     def closed(self, *args, **kwargs):
         self.cache_manager.dump_cache()
@@ -46,7 +46,6 @@ class OnlinerApartmentSpider(scrapy.Spider):
         cache_file = os.environ.get('SPIDER_URL_FILE')
         if use_file and cache_file:
             logger.info("Using URL file %s", cache_file)
-            urls = []
             with open(cache_file) as f:
                 urls = f.readlines()
                 urls = [u.strip() for u in urls]
@@ -55,7 +54,6 @@ class OnlinerApartmentSpider(scrapy.Spider):
             urls = list(get_apartment_urls())
 
         urls = [url for url in urls if not self.cache_manager.has_url(url)]
-        self.cache_manager.add_urls(urls)
         return urls
 
     def parse(self, response):
@@ -70,4 +68,5 @@ class OnlinerApartmentSpider(scrapy.Spider):
                          '//div[contains(@class, "apartment-info__sub-line apartment-info__sub-line_large")]//text()')
         loader.add_value('origin_url', response.url)
         item = loader.load_item()
+        self.cache_manager.add_url(response.url)
         yield item
