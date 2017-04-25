@@ -1,4 +1,4 @@
-from coordinates import Point
+from spider.coordinates import Point
 
 
 def test_points_with_same_coordinates_are_considered_equal():

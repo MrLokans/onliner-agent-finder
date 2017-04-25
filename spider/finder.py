@@ -3,13 +3,13 @@ from typing import Iterable
 
 import requests
 
-from apartments import Apartment
-from config import (
+from spider.apartments import Apartment
+from spider.config import (
     SEARCH_BASE_URL,
     MINSK_BOUND_COORDINTATES,
     URL_FILE
 )
-from coordinates import CoordinateRectangle
+from spider.coordinates import CoordinateRectangle
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

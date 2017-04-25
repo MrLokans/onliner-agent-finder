@@ -1,7 +1,7 @@
 from typing import List
 
-from config import LAT_INDEX, LONG_INDEX
-from utils import are_floats_equal
+from spider.config import LAT_INDEX, LONG_INDEX
+from spider.utils import are_floats_equal
 
 
 class Point(object):

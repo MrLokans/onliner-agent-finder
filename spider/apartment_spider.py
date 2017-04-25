@@ -1,11 +1,15 @@
 import os
+import sys
 import logging
 
 import scrapy
 from scrapy.loader import processors, ItemLoader
 
-from finder import get_apartment_urls
-from items import ApartmentBulletin
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(BASE_DIR, '..'))
+
+from spider.finder import get_apartment_urls
+from spider.items import ApartmentBulletin
 
 
 logger = logging.getLogger(__name__)

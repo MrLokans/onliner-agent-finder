@@ -1,4 +1,4 @@
-from coordinates import CoordinateRectangle, Point
+from spider.coordinates import CoordinateRectangle, Point
 
 
 class TestRectangleEquality(object):
