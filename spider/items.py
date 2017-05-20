@@ -10,6 +10,9 @@ class ApartmentBulletin(scrapy.Item):
     price_USD = scrapy.Field()
     apartment_type = scrapy.Field()
 
+    longitude = scrapy.Field()
+    latitude = scrapy.Field()
+
     has_furniture = scrapy.Field()
     has_kitchen_furniture = scrapy.Field()
     has_oven = scrapy.Field()

@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 import logging
 
@@ -21,6 +22,10 @@ from spider.items import ApartmentBulletin
 from spider.url_cache import URLCacheManager
 
 logger = logging.getLogger(__name__)
+
+
+LONGITUDE_REGEX = re.compile(r'longitude = (?P<longitude>\d+\.\d+),')
+LATITUDE_REGEX = re.compile(r'latitude = (?P<latitude>\d+\.\d+),')
 
 
 def get_option_field(name: str) -> str:
@@ -86,6 +91,13 @@ class OnlinerApartmentSpider(scrapy.Spider):
         return ('div[contains(@class, "apartment-options__item")][{idx}]'
                 .format(idx=option_index + 1))
 
+    def _extract_coordinates_from_script(self, text):
+        # TODO: Attempt to avoid parsing the whole page twice
+        # may be select specific <script> tag
+        longitude = LONGITUDE_REGEX.search(text).groupdict()['longitude']
+        latitude = LATITUDE_REGEX.search(text).groupdict()['latitude']
+        return longitude, latitude
+
     def parse(self, response):
         loader = BulletinLoader(ApartmentBulletin(), response)
         loader.add_xpath('phones',
@@ -105,7 +117,11 @@ class OnlinerApartmentSpider(scrapy.Spider):
             options_loader.add_xpath(get_option_field(field_name),
                                      self._get_option_xpath(index_))
 
+
+        long, lat = self._extract_coordinates_from_script(response.text)
         loader.add_value('origin_url', response.url)
+        loader.add_value('longitude', long)
+        loader.add_value('latitude', lat)
         item = loader.load_item()
         self.cache_manager.add_url(response.url)
         yield item
