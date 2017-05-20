@@ -11,3 +11,17 @@ MINSK_BOUND_COORDINTATES = {
     'rt': ('54.01559842227507', '27.86870368988288')
 }
 CACHE_FILENAME = 'spider_url_cache.pickle'
+
+
+APARTMENT_OPTIONS = (
+    ("furniture", "Мебель"),
+    ("kitchen_furniture", "Кухонная мебель"),
+    ("oven", "Плита"),
+    ("fridge", "Холодильник"),
+    ("washing_machine", "Стиральная машина"),
+    ("tv", "Телевизор"),
+    ("internet", "Интернет"),
+    ("balcony", "Лоджия или балкон"),
+    ("conditioner", "Кондиционер"),
+)
+OPTION_NOT_SELECTED_CLASS = 'apartment-options__item_lack'

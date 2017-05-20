@@ -23,6 +23,11 @@ class Point(object):
 
 
 class CoordinateRectangle(object):
+    """
+    Represents coordinates rectangle
+    used in URLS to filter apartment
+    location
+    """
 
     def __init__(self, left_bottom: Point, right_top: Point):
         self.left_bottom = left_bottom
