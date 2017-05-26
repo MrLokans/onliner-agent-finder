@@ -2,6 +2,7 @@ import logging
 from typing import Iterable
 
 import requests
+from tqdm import tqdm
 
 from spider.apartments import Apartment
 from spider.config import (
@@ -13,6 +14,12 @@ from spider.coordinates import CoordinateRectangle
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+logging\
+    .getLogger('requests.packages.urllib3.connectionpool')\
+    .setLevel(logging.INFO)
+
+DEFAULT_RECTANGLES_SIZE = (6, 6)
 
 
 def get_available_apartments(coordinate_rectangle: CoordinateRectangle) -> Iterable[Apartment]:
@@ -34,9 +41,15 @@ def get_available_apartments(coordinate_rectangle: CoordinateRectangle) -> Itera
 
 
 def get_apartment_urls() -> Iterable[str]:
+    """
+    Gets all available apartment links,
+    by splitting the map into several chunks
+    and requesting the data to avoid API limits
+    """
     url_cache = set()
     coordinate_rectangle = CoordinateRectangle.from_dict(MINSK_BOUND_COORDINTATES)
-    for coord in coordinate_rectangle.get_rectangles(6, 6):
+    rectangles = coordinate_rectangle.get_rectangles(*DEFAULT_RECTANGLES_SIZE)
+    for coord in tqdm(rectangles):
         for ap in get_available_apartments(coord):
             if ap.url in url_cache:
                 continue
