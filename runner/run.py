@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import argparse
 import logging
 
 from scrapy.crawler import CrawlerProcess
@@ -10,14 +11,21 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-OUTPUT_FILE = 'bulletins.json'
-OUTPUT_FORMAT = OUTPUT_FILE.split('.')[-1]
+DEFAULT_OUTPUT_FILE = 'bulletins.json'
+
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-o', '--output-file',
+                        default=DEFAULT_OUTPUT_FILE)
+    return parser.parse_args()
 
 
 def main():
+    args = parse_args()
     overridden_settings = {
-        'FEED_FORMAT': OUTPUT_FORMAT,
-        'FEED_URI': OUTPUT_FILE,
+        'FEED_FORMAT': args.output_file,
+        'FEED_URI': args.output_file.split('.')[-1],
         'SPIDER_LOADER_WARN_ONLY': True,
         'LOG_LEVEL': 'INFO',
     }
