@@ -18,6 +18,9 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('-o', '--output-file',
                         default=DEFAULT_OUTPUT_FILE)
+    parser.add_argument('-u', '--url-file',
+                        help='File with list of URLs to start scrapping from.',
+                        default=None)
     return parser.parse_args()
 
 
@@ -31,7 +34,7 @@ def main():
     }
     process = CrawlerProcess(overridden_settings)
 
-    process.crawl(OnlinerApartmentSpider)
+    process.crawl(OnlinerApartmentSpider, url_file=args.url_file)
     process.start()
 
 

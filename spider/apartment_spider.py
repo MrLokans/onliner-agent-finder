@@ -63,21 +63,19 @@ class BulletinLoader(ItemLoader):
 class OnlinerApartmentSpider(scrapy.Spider):
     name = 'onliner_apartment_spider'
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, url_file=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.cache_manager = URLCacheManager()
         self.cache_manager.load_cache()
-        self.start_urls = self._get_start_urls()
+        self.start_urls = self._get_start_urls(url_file)
 
     def closed(self, *args, **kwargs):
         self.cache_manager.dump_cache()
 
-    def _get_start_urls(self):
-        use_file = os.environ.get('SPIDER_USE_URL_FILE')
-        cache_file = os.environ.get('SPIDER_URL_FILE')
-        if use_file and cache_file:
-            logger.info("Using URL file %s", cache_file)
-            with open(cache_file) as f:
+    def _get_start_urls(self, url_file=None):
+        if url_file:
+            logger.info("Using URL file %s", url_file)
+            with open(url_file) as f:
                 urls = f.readlines()
                 urls = [u.strip() for u in urls]
         else:
@@ -116,7 +114,6 @@ class OnlinerApartmentSpider(scrapy.Spider):
         for index_, (field_name, _) in enumerate(APARTMENT_OPTIONS):
             options_loader.add_xpath(get_option_field(field_name),
                                      self._get_option_xpath(index_))
-
 
         long, lat = self._extract_coordinates_from_script(response.text)
         loader.add_value('origin_url', response.url)
