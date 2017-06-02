@@ -1,4 +1,4 @@
-URL_FILE = 'apartment_urls.txt'
+DEFAULT_URL_FILE = 'apartment_urls.txt'
 
 SEARCH_BASE_URL = 'https://ak.api.onliner.by/search/apartments'
 LAT_INDEX, LONG_INDEX = 0, 1

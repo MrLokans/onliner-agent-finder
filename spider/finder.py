@@ -1,3 +1,4 @@
+import argparse
 import logging
 from typing import Iterable
 
@@ -8,7 +9,7 @@ from spider.apartments import Apartment
 from spider.config import (
     SEARCH_BASE_URL,
     MINSK_BOUND_COORDINTATES,
-    URL_FILE
+    DEFAULT_URL_FILE
 )
 from spider.coordinates import CoordinateRectangle
 
@@ -58,7 +59,13 @@ def get_apartment_urls() -> Iterable[str]:
 
 
 def main():
-    with open(URL_FILE, 'w+') as f:
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-o', '--output-file',
+                        help='File to write collected URLS to.',
+                        default=DEFAULT_URL_FILE)
+    args = parser.parse_args()
+
+    with open(args.output_file, 'w+') as f:
         for url in get_apartment_urls():
             f.write('{}\n'.format(url))
 
