@@ -1,4 +1,4 @@
-from spider.coordinates import CoordinateRectangle, Point
+from agent_spider.coordinates import CoordinateRectangle, Point
 
 
 class TestRectangleEquality(object):
@@ -11,7 +11,6 @@ class TestRectangleEquality(object):
         rect2 = CoordinateRectangle(p1, p2)
 
         assert rect1 == rect2
-
 
     def test_rectangles_with_different_coords_are_not_considered_equal(self):
         p1 = Point(2.0, 3.0)

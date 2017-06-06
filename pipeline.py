@@ -3,7 +3,7 @@ import subprocess
 
 import luigi
 
-from spider.finder import get_apartment_urls
+from agent_spider.finder import get_apartment_urls
 
 
 class CrawlInitialURLsTask(luigi.Task):
@@ -35,6 +35,8 @@ class CrawlApartmentURLs(luigi.Task):
         return luigi.LocalTarget(self.output_path)
 
     def run(self):
-        temp_file = '{}_tmp'.format(self.output_path)
-        subprocess.check_output(['python', '-m', 'runner.run', '-o', temp_file])
+        temp_file = '{}_tmp.json'.format(self.output_path)
+        subprocess.check_output(['python', '-m', 'agent_spider.run',
+                                 '-o', temp_file,
+                                 '-u', self.input().path])
         os.rename(temp_file, self.output().path)

@@ -8,7 +8,7 @@ version = ""
 
 requirements = []
 # I actually took it from requests library
-with open('spider/__init__.py', 'r') as fd:
+with open('agent_spider/__init__.py', 'r') as fd:
     version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]',
                         fd.read(), re.MULTILINE).group(1)
 
