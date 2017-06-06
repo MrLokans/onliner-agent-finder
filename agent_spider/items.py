@@ -22,3 +22,8 @@ class ApartmentBulletin(scrapy.Item):
     has_internet = scrapy.Field()
     has_balcony = scrapy.Field()
     has_conditioner = scrapy.Field()
+
+    images = scrapy.Field()
+    description = scrapy.Field()
+    created = scrapy.Field()
+    last_updated = scrapy.Field()

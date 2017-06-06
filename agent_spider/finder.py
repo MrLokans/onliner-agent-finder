@@ -5,13 +5,13 @@ from typing import Iterable
 import requests
 from tqdm import tqdm
 
-from spider.apartments import Apartment
-from spider.config import (
+from agent_spider.apartments import Apartment
+from agent_spider.config import (
     SEARCH_BASE_URL,
     MINSK_BOUND_COORDINTATES,
     DEFAULT_URL_FILE
 )
-from spider.coordinates import CoordinateRectangle
+from agent_spider.coordinates import CoordinateRectangle
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

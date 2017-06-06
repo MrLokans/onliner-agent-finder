@@ -5,7 +5,7 @@ import logging
 
 from scrapy.crawler import CrawlerProcess
 
-from spider.apartment_spider import OnlinerApartmentSpider
+from agent_spider.apartment_spider import OnlinerApartmentSpider
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -21,6 +21,10 @@ def parse_args():
     parser.add_argument('-u', '--url-file',
                         help='File with list of URLs to start scrapping from.',
                         default=None)
+    parser.add_argument('-c', '--cache',
+                        help='Whether to use URL cache for spider.',
+                        default=False,
+                        type=bool)
     return parser.parse_args()
 
 

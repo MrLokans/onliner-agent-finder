@@ -13,13 +13,13 @@ from scrapy.selector import Selector
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(BASE_DIR, '..'))
 
-from spider.config import (
+from agent_spider.config import (
     APARTMENT_OPTIONS,
     OPTION_NOT_SELECTED_CLASS
 )
-from spider.finder import get_apartment_urls
-from spider.items import ApartmentBulletin
-from spider.url_cache import URLCacheManager
+from agent_spider.finder import get_apartment_urls
+from agent_spider.items import ApartmentBulletin
+from agent_spider.url_cache import URLCacheManager
 
 logger = logging.getLogger(__name__)
 

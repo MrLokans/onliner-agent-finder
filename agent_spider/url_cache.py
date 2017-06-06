@@ -4,7 +4,7 @@ import pickle
 
 from typing import Iterable
 
-from spider.config import CACHE_FILENAME
+from agent_spider.config import CACHE_FILENAME
 
 
 class URLCacheManager(object):

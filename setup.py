@@ -29,7 +29,7 @@ setup(
     packages=find_packages(exclude=["tests"]),
     entry_points={
         'console_scripts': [
-            'onliner_agent_finder = runner.run:main'
+            'onliner_agent_finder = agent_spider.run:main'
         ]
     },
     install_requires=requirements,
