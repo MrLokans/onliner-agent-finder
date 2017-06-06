@@ -26,7 +26,9 @@ setup(
     author='MrLokans',
     author_email='mrlokans@gmail.com',
     license='MIT',
-    packages=find_packages(exclude=["tests"]),
+    packages=['agent_spider', ],
+    package_dir={'agent_spider': 'agent_spider'},
+    include_package_data=True,
     entry_points={
         'console_scripts': [
             'onliner_agent_finder = agent_spider.run:main'
