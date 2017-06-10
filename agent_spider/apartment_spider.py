@@ -93,6 +93,7 @@ class OnlinerApartmentSpider(scrapy.Spider):
             urls = list(get_apartment_urls())
 
         urls = [url for url in urls if not self.cache_manager.has_url(url)]
+        return urls[:1]
         return urls
 
     def _get_option_xpath(self, option_index: int) -> str:
