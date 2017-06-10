@@ -26,6 +26,7 @@ logger = logging.getLogger(__name__)
 
 LONGITUDE_REGEX = re.compile(r'longitude = (?P<longitude>\d+\.\d+),')
 LATITUDE_REGEX = re.compile(r'latitude = (?P<latitude>\d+\.\d+),')
+ONLINER_IMAGE_REGEX = re.compile(r'https:\/\/content\.onliner\.by[a-zA-Z0-9_\/]+\.jpeg')
 
 
 def get_option_field(name: str) -> str:
@@ -35,6 +36,12 @@ def get_option_field(name: str) -> str:
 def parse_options_block(block):
     sel = Selector(text=block)
     return not sel.css(".{}".format(OPTION_NOT_SELECTED_CLASS))
+
+
+def parse_bulletin_images(text):
+    # TODO: add missing URL handling
+    match = ONLINER_IMAGE_REGEX.search(text)
+    return match.group()
 
 
 class BulletinLoader(ItemLoader):
@@ -48,6 +55,9 @@ class BulletinLoader(ItemLoader):
     address_in = processors.MapCompose(lambda s: s.strip())
     apartment_type_in = processors.MapCompose(lambda s: s.strip())
     price_USD_in = processors.MapCompose(lambda s: s.replace('$', '').strip())
+
+    images_in = processors.MapCompose(parse_bulletin_images)
+    images_out = processors.MapCompose(lambda l: "".join(l))
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -83,6 +93,7 @@ class OnlinerApartmentSpider(scrapy.Spider):
             urls = list(get_apartment_urls())
 
         urls = [url for url in urls if not self.cache_manager.has_url(url)]
+        return urls[:1]
         return urls
 
     def _get_option_xpath(self, option_index: int) -> str:
@@ -110,6 +121,8 @@ class OnlinerApartmentSpider(scrapy.Spider):
                          '//span[contains(@class, "apartment-bar__price-value_complementary")]//text()')
         loader.add_xpath('apartment_type',
                          '//span[contains(@class, "apartment-bar__value")]//text()')
+        loader.add_xpath('images',
+                         '//div[contains(@class, "apartment-gallery__slide")]/@style')
         options_loader = loader.nested_xpath('//div[contains(@class, "apartment-options")]')
         for index_, (field_name, _) in enumerate(APARTMENT_OPTIONS):
             options_loader.add_xpath(get_option_field(field_name),
