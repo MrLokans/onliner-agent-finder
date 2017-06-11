@@ -3,6 +3,9 @@ import re
 import sys
 import logging
 
+import html2text
+html_processor = html2text.HTML2Text()
+
 import scrapy
 from scrapy.loader import (
     processors,
@@ -26,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 LONGITUDE_REGEX = re.compile(r'longitude = (?P<longitude>\d+\.\d+),')
 LATITUDE_REGEX = re.compile(r'latitude = (?P<latitude>\d+\.\d+),')
-ONLINER_IMAGE_REGEX = re.compile(r'https:\/\/content\.onliner\.by[a-zA-Z0-9_\/]+\.jpeg')
+ONLINER_IMAGE_REGEX = re.compile(r'https:\/\/content\.onliner\.by[a-zA-Z0-9_\/]+\.(?:jpeg|jpg|png)')
 
 
 def get_option_field(name: str) -> str:
@@ -39,6 +42,10 @@ def parse_options_block(block):
 
 
 def parse_bulletin_images(text):
+    """
+    We need to extract image URLs from
+    the style attribute.
+    """
     # TODO: add missing URL handling
     match = ONLINER_IMAGE_REGEX.search(text)
     return match.group()
@@ -58,6 +65,8 @@ class BulletinLoader(ItemLoader):
 
     images_in = processors.MapCompose(parse_bulletin_images)
     images_out = processors.MapCompose(lambda l: "".join(l))
+
+    description_out = processors.MapCompose(html_processor.handle)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -93,7 +102,6 @@ class OnlinerApartmentSpider(scrapy.Spider):
             urls = list(get_apartment_urls())
 
         urls = [url for url in urls if not self.cache_manager.has_url(url)]
-        return urls[:1]
         return urls
 
     def _get_option_xpath(self, option_index: int) -> str:
@@ -123,6 +131,8 @@ class OnlinerApartmentSpider(scrapy.Spider):
                          '//span[contains(@class, "apartment-bar__value")]//text()')
         loader.add_xpath('images',
                          '//div[contains(@class, "apartment-gallery__slide")]/@style')
+        loader.add_xpath('description',
+                         '//div[contains(@class, "apartment-info__sub-line_extended-bottom")]//text()')
         options_loader = loader.nested_xpath('//div[contains(@class, "apartment-options")]')
         for index_, (field_name, _) in enumerate(APARTMENT_OPTIONS):
             options_loader.add_xpath(get_option_field(field_name),
