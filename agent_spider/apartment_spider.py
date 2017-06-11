@@ -82,14 +82,22 @@ class BulletinLoader(ItemLoader):
 class OnlinerApartmentSpider(scrapy.Spider):
     name = 'onliner_apartment_spider'
 
-    def __init__(self, url_file=None, *args, **kwargs):
+    def __init__(self,
+                 url_file=None,
+                 use_cache: bool=True,
+                 *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.cache_manager = URLCacheManager()
-        self.cache_manager.load_cache()
+        self._use_cache = use_cache
+        if self._use_cache:
+            logger.info('Spider cache is enabled. '
+                        'Initialising cache manager.')
+            self.cache_manager = URLCacheManager()
+            self.cache_manager.load_cache()
         self.start_urls = self._get_start_urls(url_file)
 
     def closed(self, *args, **kwargs):
-        self.cache_manager.dump_cache()
+        if self._use_cache:
+            self.cache_manager.dump_cache()
 
     def _get_start_urls(self, url_file=None):
         if url_file:
@@ -101,7 +109,9 @@ class OnlinerApartmentSpider(scrapy.Spider):
             logger.info("Obtaining URL from onliner website")
             urls = list(get_apartment_urls())
 
-        urls = [url for url in urls if not self.cache_manager.has_url(url)]
+        if self._use_cache:
+            urls = [url for url in urls
+                    if not self.cache_manager.has_url(url)]
         return urls
 
     def _get_option_xpath(self, option_index: int) -> str:
@@ -143,5 +153,6 @@ class OnlinerApartmentSpider(scrapy.Spider):
         loader.add_value('longitude', long)
         loader.add_value('latitude', lat)
         item = loader.load_item()
-        self.cache_manager.add_url(response.url)
+        if self._use_cache:
+            self.cache_manager.add_url(response.url)
         yield item

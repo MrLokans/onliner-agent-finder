@@ -25,10 +25,10 @@ def parse_args():
     parser.add_argument('-u', '--url-file',
                         help='File with list of URLs to start scrapping from.',
                         default=None)
-    parser.add_argument('-c', '--cache',
+    parser.add_argument('--use-cache',
                         help='Whether to use URL cache for spider.',
-                        default=False,
-                        type=bool)
+                        action='store_true',
+                        default=False)
     return parser.parse_args()
 
 
@@ -42,7 +42,9 @@ def main():
     }
     process = CrawlerProcess(overridden_settings)
 
-    process.crawl(OnlinerApartmentSpider, url_file=args.url_file)
+    process.crawl(OnlinerApartmentSpider,
+                  url_file=args.url_file,
+                  use_cache=args.use_cache)
     process.start()
 
 
