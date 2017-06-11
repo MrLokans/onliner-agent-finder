@@ -1,82 +1,24 @@
-import os
 import re
-import sys
 import logging
 
-import html2text
-html_processor = html2text.HTML2Text()
 
 import scrapy
-from scrapy.loader import (
-    processors,
-    ItemLoader
-)
-from scrapy.selector import Selector
-
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.join(BASE_DIR, '..'))
-
-from agent_spider.config import (
-    APARTMENT_OPTIONS,
-    OPTION_NOT_SELECTED_CLASS
-)
+from agent_spider.config import APARTMENT_OPTIONS
 from agent_spider.finder import get_apartment_urls
 from agent_spider.items import ApartmentBulletin
+from agent_spider.loader import BulletinLoader
 from agent_spider.url_cache import URLCacheManager
+
 
 logger = logging.getLogger(__name__)
 
 
 LONGITUDE_REGEX = re.compile(r'longitude = (?P<longitude>\d+\.\d+),')
 LATITUDE_REGEX = re.compile(r'latitude = (?P<latitude>\d+\.\d+),')
-ONLINER_IMAGE_REGEX = re.compile(r'https:\/\/content\.onliner\.by[a-zA-Z0-9_\/]+\.(?:jpeg|jpg|png)')
 
 
 def get_option_field(name: str) -> str:
     return 'has_{field}'.format(field=name)
-
-
-def parse_options_block(block):
-    sel = Selector(text=block)
-    return not sel.css(".{}".format(OPTION_NOT_SELECTED_CLASS))
-
-
-def parse_bulletin_images(text):
-    """
-    We need to extract image URLs from
-    the style attribute.
-    """
-    # TODO: add missing URL handling
-    match = ONLINER_IMAGE_REGEX.search(text)
-    return match.group()
-
-
-class BulletinLoader(ItemLoader):
-    default_input_processor = processors.Identity()
-    default_output_processor = processors.TakeFirst()
-
-    url_in = processors.MapCompose(lambda s: s)
-    phones_in = processors.MapCompose(lambda s: s.replace(' ', '').replace('-', ''))
-    phones_out = processors.MapCompose(lambda l: "".join(l))
-    name_in = processors.MapCompose(lambda s: s.strip())
-    address_in = processors.MapCompose(lambda s: s.strip())
-    apartment_type_in = processors.MapCompose(lambda s: s.strip())
-    price_USD_in = processors.MapCompose(lambda s: s.replace('$', '').strip())
-
-    images_in = processors.MapCompose(parse_bulletin_images)
-    images_out = processors.MapCompose(lambda l: "".join(l))
-
-    description_out = processors.MapCompose(html_processor.handle)
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.add_apartment_options_fields_to_loader()
-
-    def add_apartment_options_fields_to_loader(self):
-        for field_name, _ in APARTMENT_OPTIONS:
-            setattr(self,
-                    "has_{}_in".format(field_name),
-                    processors.MapCompose(parse_options_block))
 
 
 class OnlinerApartmentSpider(scrapy.Spider):

@@ -1,3 +1,5 @@
+import re
+
 DEFAULT_URL_FILE = 'apartment_urls.txt'
 
 SEARCH_BASE_URL = 'https://ak.api.onliner.by/search/apartments'
@@ -25,3 +27,4 @@ APARTMENT_OPTIONS = (
     ("conditioner", "Кондиционер"),
 )
 OPTION_NOT_SELECTED_CLASS = 'apartment-options__item_lack'
+ONLINER_IMAGE_REGEX = re.compile(r'https:\/\/content\.onliner\.by[a-zA-Z0-9_\/]+\.(?:jpeg|jpg|png)')
