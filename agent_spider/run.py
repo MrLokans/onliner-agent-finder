@@ -6,6 +6,7 @@ import logging
 from scrapy.crawler import CrawlerProcess
 
 from agent_spider.apartment_spider import OnlinerApartmentSpider
+from agent_spider import settings
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -16,6 +17,16 @@ logging.getLogger('scrapy.*').setLevel(logging.INFO)
 
 
 DEFAULT_OUTPUT_FILE = 'bulletins.json'
+
+
+def read_default_settings():
+    """
+    Reads spider settings and returns
+    dictionary of settings.
+    """
+    return {s: getattr(settings, s)
+            for s in dir(settings)
+            if s.isupper()}
 
 
 def parse_args():
@@ -34,13 +45,15 @@ def parse_args():
 
 def main():
     args = parse_args()
+    spider_settings = read_default_settings()
     overridden_settings = {
         'FEED_FORMAT': args.output_file.split('.')[-1],
         'FEED_URI': args.output_file,
         'SPIDER_LOADER_WARN_ONLY': True,
         'LOG_LEVEL': 'INFO',
     }
-    process = CrawlerProcess(overridden_settings)
+    spider_settings.update(overridden_settings)
+    process = CrawlerProcess(spider_settings)
 
     process.crawl(OnlinerApartmentSpider,
                   url_file=args.url_file,

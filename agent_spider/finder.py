@@ -65,7 +65,7 @@ def main():
                         default=DEFAULT_URL_FILE)
     args = parser.parse_args()
 
-    with open(args.output_file, 'w+') as f:
+    with open(args.output_file, 'w') as f:
         for url in get_apartment_urls():
             f.write('{}\n'.format(url))
 
