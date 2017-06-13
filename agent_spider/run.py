@@ -19,14 +19,36 @@ logging.getLogger('scrapy.*').setLevel(logging.INFO)
 DEFAULT_OUTPUT_FILE = 'bulletins.json'
 
 
-def read_default_settings():
-    """
-    Reads spider settings and returns
-    dictionary of settings.
-    """
-    return {s: getattr(settings, s)
-            for s in dir(settings)
-            if s.isupper()}
+class SpiderLauncher(object):
+
+    def __init__(self,
+                 local_settings: dict=None,
+                 use_cache=False,
+                 url_file: str=None):
+        self._settings = self._read_default_settings()
+        if local_settings:
+            self._settings.update(local_settings)
+        self._use_cache = use_cache
+        self._url_file = url_file
+
+    @staticmethod
+    def _read_default_settings():
+        """
+        Reads spider settings and returns
+        dictionary of settings.
+        """
+        global settings
+        return {s: getattr(settings, s)
+                for s in dir(settings)
+                if s.isupper()}
+
+    def run(self):
+        process = CrawlerProcess(self._settings)
+
+        process.crawl(OnlinerApartmentSpider,
+                      url_file=self._url_file,
+                      use_cache=self._use_cache)
+        process.start()
 
 
 def parse_args():
@@ -45,20 +67,14 @@ def parse_args():
 
 def main():
     args = parse_args()
-    spider_settings = read_default_settings()
     overridden_settings = {
         'FEED_FORMAT': args.output_file.split('.')[-1],
         'FEED_URI': args.output_file,
         'SPIDER_LOADER_WARN_ONLY': True,
         'LOG_LEVEL': 'INFO',
     }
-    spider_settings.update(overridden_settings)
-    process = CrawlerProcess(spider_settings)
-
-    process.crawl(OnlinerApartmentSpider,
-                  url_file=args.url_file,
-                  use_cache=args.use_cache)
-    process.start()
+    launcher = SpiderLauncher(local_settings=overridden_settings)
+    launcher.run()
 
 
 if __name__ == '__main__':
