@@ -27,4 +27,4 @@ APARTMENT_OPTIONS = (
     ("conditioner", "Кондиционер"),
 )
 OPTION_NOT_SELECTED_CLASS = 'apartment-options__item_lack'
-ONLINER_IMAGE_REGEX = re.compile(r'https:\/\/content\.onliner\.by[a-zA-Z0-9_\/]+\.(?:jpeg|jpg|png)')
+ONLINER_IMAGE_REGEX = re.compile(r'(?:http|https):\/\/[a-zA-Z0-9_\/\.\-]+\.(?:jpeg|jpg|png|gif)')

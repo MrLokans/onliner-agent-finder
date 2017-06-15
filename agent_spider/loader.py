@@ -27,7 +27,10 @@ def parse_bulletin_images(text):
     """
     # TODO: add missing URL handling
     match = ONLINER_IMAGE_REGEX.search(text)
-    return match.group()
+    if match:
+        return match.group()
+    else:
+        return ''
 
 
 class BulletinLoader(ItemLoader):
