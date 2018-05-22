@@ -3,11 +3,12 @@ import scrapy
 
 class ApartmentBulletin(scrapy.Item):
     phones = scrapy.Field()
-    url = scrapy.Field()
-    name = scrapy.Field()
+    user_url = scrapy.Field()
+    user_name = scrapy.Field()
     address = scrapy.Field()
     origin_url = scrapy.Field()
     price_USD = scrapy.Field()
+    price_BYN = scrapy.Field()
     apartment_type = scrapy.Field()
 
     longitude = scrapy.Field()
@@ -25,5 +26,6 @@ class ApartmentBulletin(scrapy.Item):
 
     images = scrapy.Field()
     description = scrapy.Field()
+
     created = scrapy.Field()
     last_updated = scrapy.Field()

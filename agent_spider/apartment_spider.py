@@ -71,12 +71,14 @@ class OnlinerApartmentSpider(scrapy.Spider):
         loader = BulletinLoader(ApartmentBulletin(), response)
         loader.add_xpath('phones',
                          '//ul[contains(@class, "apartment-info__list_phones")]//li//a//text()')
-        loader.add_xpath('url',
-                         '(//div[contains(@class, "apartment-info__sub-line_extended")]//a)[last()]/@href')
-        loader.add_xpath('name',
-                         '(//div[contains(@class, "apartment-info__sub-line_extended")]//a)[last()]/text()')
+        loader.add_xpath('user_name',
+                         '(//div[contains(@class, "apartment-info__sub-line_extended")]//a)[last() - 1]//text()')
+        loader.add_xpath('user_url',
+                         '(//div[contains(@class, "apartment-info__sub-line_extended")]//a)[last() - 1]/@href')
         loader.add_xpath('address',
                          '//div[contains(@class, "apartment-info__sub-line apartment-info__sub-line_large")]//text()')
+        loader.add_xpath('price_BYN',
+                         '//span[contains(@class, "apartment-bar__price-value_primary")]//text()')
         loader.add_xpath('price_USD',
                          '//span[contains(@class, "apartment-bar__price-value_complementary")]//text()')
         loader.add_xpath('apartment_type',
@@ -85,11 +87,12 @@ class OnlinerApartmentSpider(scrapy.Spider):
                          '//div[contains(@class, "apartment-gallery__slide")]/@style')
         loader.add_xpath('description',
                          '//div[contains(@class, "apartment-info__sub-line_extended-bottom")]//text()')
+        loader.add_xpath('last_updated',
+                         '//div[contains(@id, "apartment-up__last-time")]//text()')
         options_loader = loader.nested_xpath('//div[contains(@class, "apartment-options")]')
         for index_, (field_name, _) in enumerate(APARTMENT_OPTIONS):
             options_loader.add_xpath(get_option_field(field_name),
                                      self._get_option_xpath(index_))
-
         long, lat = self._extract_coordinates_from_script(response.text)
         loader.add_value('origin_url', response.url)
         loader.add_value('longitude', long)

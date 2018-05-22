@@ -37,18 +37,20 @@ class BulletinLoader(ItemLoader):
     default_input_processor = processors.Identity()
     default_output_processor = processors.TakeFirst()
 
-    url_in = processors.MapCompose(lambda s: s)
+    user_url_in = processors.MapCompose(lambda s: s)
+    user_name_in = processors.MapCompose(lambda s: s.strip())
     phones_in = processors.MapCompose(lambda s: s.replace(' ', '')
                                                  .replace('-', ''))
     phones_out = processors.MapCompose("".join)
-    name_in = processors.MapCompose(lambda s: s.strip())
     address_in = processors.MapCompose(lambda s: s.strip())
     apartment_type_in = processors.MapCompose(lambda s: s.strip())
+    price_BYN_in = processors.MapCompose(lambda s: s.replace('р.', '').replace(',', '.').strip())
     price_USD_in = processors.MapCompose(lambda s: s.replace('$', '').strip())
 
     images_in = processors.MapCompose(parse_bulletin_images)
     images_out = processors.MapCompose("".join)
 
+    last_updated_in = processors.MapCompose(lambda s: s.strip())
     description_out = processors.MapCompose(html_processor.handle)
 
     def __init__(self, *args, **kwargs):
