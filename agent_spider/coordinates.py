@@ -34,8 +34,8 @@ class CoordinateRectangle(object):
         self.right_top = right_top
 
     def get_rectangles(self,
-                       cols: int=2,
-                       rows: int=2) -> List['CoordinateRectangle']:
+                       cols: int = 2,
+                       rows: int = 2) -> List['CoordinateRectangle']:
         """
         Split the given rectangle into cols*rows rectangles with the same square
         """

@@ -33,8 +33,12 @@ def parse_bulletin_images(text):
         return ''
 
 
-class BulletinLoader(ItemLoader):
-    default_input_processor = processors.Identity()
+def parse_square_meters_value(value: str) -> float:
+    return float(value.replace('\xa0', ' ').replace('м', '').replace(',', '.').strip())
+
+
+class BaseLoader(ItemLoader):
+
     default_output_processor = processors.TakeFirst()
 
     user_url_in = processors.MapCompose(lambda s: s)
@@ -53,6 +57,8 @@ class BulletinLoader(ItemLoader):
     last_updated_in = processors.MapCompose(lambda s: s.strip())
     description_out = processors.MapCompose(html_processor.handle)
 
+
+class RentLoader(BaseLoader):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.add_apartment_options_fields_to_loader()
@@ -62,3 +68,15 @@ class BulletinLoader(ItemLoader):
             setattr(self,
                     "has_{}_in".format(field_name),
                     processors.MapCompose(parse_options_block))
+
+
+class SoldLoader(BaseLoader):
+    floors_in = processors.MapCompose(lambda s: s.strip())
+    kitchen_area_in = processors.MapCompose(parse_square_meters_value)
+    total_area_in = processors.MapCompose(parse_square_meters_value)
+    living_area_in = processors.MapCompose(parse_square_meters_value)
+
+    house_type = processors.MapCompose(lambda s: s)
+    balcony_details = processors.MapCompose(lambda s: s)
+    parking_details = processors.MapCompose(lambda s: s)
+    ceiling_details = processors.MapCompose(lambda s: s)

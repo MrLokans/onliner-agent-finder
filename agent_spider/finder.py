@@ -5,12 +5,11 @@ from typing import Iterable
 import requests
 from tqdm import tqdm
 
-from agent_spider.apartments import Apartment
 from agent_spider.config import (
-    SEARCH_BASE_URL,
+    RENTED_APARTMENTS_SEARCH_API_URL,
     MINSK_BOUND_COORDINTATES,
-    DEFAULT_URL_FILE
-)
+    DEFAULT_URL_FILE,
+    SOLD_APARTMENTS_SEARCH_API_URL)
 from agent_spider.coordinates import CoordinateRectangle
 
 logging.basicConfig(level=logging.INFO)
@@ -23,22 +22,22 @@ logging\
 DEFAULT_RECTANGLES_SIZE = (6, 6)
 
 
-def get_available_apartments(coordinate_rectangle: CoordinateRectangle) -> Iterable[Apartment]:
-    session = requests.Session()
-    payload = coordinate_rectangle.to_url_params()
+def get_apartment_urls_for_rectangle(coordinate_rectangle: CoordinateRectangle) -> Iterable[str]:
+    urls_to_check = (SOLD_APARTMENTS_SEARCH_API_URL, RENTED_APARTMENTS_SEARCH_API_URL)
+    for url_to_check in urls_to_check:
+        session = requests.Session()
+        payload = coordinate_rectangle.to_url_params()
 
-    req = session.get(SEARCH_BASE_URL, params=payload)
-    req = req.json()
+        req = session.get(url_to_check, params=payload)
+        req = req.json()
 
-    total_pages = req['page']['last']
+        total_pages = req['page']['last']
 
-    for i in range(1, total_pages + 1):
-        payload.update({'page': i})
-        resp = session.get(SEARCH_BASE_URL, params=payload)
-        for ap in resp.json()['apartments']:
-            data = ap.copy()
-            data.update({'origin_url': resp.url})
-            yield Apartment.from_dict(data)
+        for i in range(1, total_pages + 1):
+            payload.update({'page': i})
+            resp = session.get(url_to_check, params=payload)
+            for ap in resp.json()['apartments']:
+                yield ap['url']
 
 
 def get_apartment_urls() -> Iterable[str]:
@@ -51,11 +50,11 @@ def get_apartment_urls() -> Iterable[str]:
     coordinate_rectangle = CoordinateRectangle.from_dict(MINSK_BOUND_COORDINTATES)
     rectangles = coordinate_rectangle.get_rectangles(*DEFAULT_RECTANGLES_SIZE)
     for coord in tqdm(rectangles):
-        for ap in get_available_apartments(coord):
-            if ap.url in url_cache:
+        for url in get_apartment_urls_for_rectangle(coord):
+            if url in url_cache:
                 continue
-            url_cache.add(ap.url)
-            yield ap.url
+            url_cache.add(url)
+            yield url
 
 
 def main():
