@@ -118,10 +118,12 @@ class OnlinerApartmentSpider(scrapy.Spider):
 
     def _configure_sold_loader(self, loader, response):
         options_texts = response.xpath('//td[contains(@class, "apartment-options-table__cell_right")]//text()')
-        for option_index, field_name in SOLD_OPTIONS_INFO_FIELDS:
-            selector_result = options_texts[option_index]
-            loader.add_value(field_name, selector_result.extract())
-
+        for option_index, field_name, missing_value in SOLD_OPTIONS_INFO_FIELDS:
+            try:
+                selector_result = options_texts[option_index]
+                loader.add_value(field_name, selector_result.extract())
+            except IndexError:
+                loader.add_value(field_name, missing_value)
         details_texts = response.xpath('//li[contains(@class, "apartment-options__item")]//text()')
         for field_name, details_element in zip(SOLD_DETAIL_FIELDS, details_texts):
             loader.add_value(field_name, details_element.extract())

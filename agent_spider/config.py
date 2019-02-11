@@ -32,11 +32,11 @@ APARTMENT_OPTIONS = (
 )
 
 SOLD_OPTIONS_INFO_FIELDS = (
-    # Index in xpath results list, item field name
-    (0, 'floors'),
-    (1, 'total_area'),
-    (4, 'living_area'),
-    (7, 'kitchen_area'),
+    # Index in xpath results list, item field name, missing value
+    (0, 'floors', ''),
+    (1, 'total_area', ''),
+    (4, 'living_area', ''),
+    (7, 'kitchen_area', 'Кухня совмещена с жилой'),
 )
 SOLD_DETAIL_FIELDS = (
     'apartment_type',

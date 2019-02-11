@@ -34,6 +34,8 @@ def parse_bulletin_images(text):
 
 
 def parse_square_meters_value(value: str) -> float:
+    if value == 'Кухня совмещена с жилой':
+        return 0.0
     return float(value.replace('\xa0', ' ').replace('м', '').replace(',', '.').strip())
 
 
