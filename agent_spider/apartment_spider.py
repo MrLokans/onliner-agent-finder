@@ -75,9 +75,16 @@ class OnlinerApartmentSpider(scrapy.Spider):
         loader = self._get_loader_for_response(response)
         loader = self._configure_common_loader(loader, response)
         item = loader.load_item()
+        item = self._set_is_owner(item)
         if self._use_cache:
             self.cache_manager.add_url(response.url)
         yield item
+
+    def _set_is_owner(self, item):
+        type_ = item['owner_type']
+        assert type_ in ['Агентство', 'Собственник']
+        item['is_owner'] = type_ == 'Собственник'
+        return item
 
     def _configure_common_loader(self, loader, response):
 
@@ -101,6 +108,8 @@ class OnlinerApartmentSpider(scrapy.Spider):
                          '//div[contains(@class, "apartment-info__sub-line_extended-bottom")]//text()')
         loader.add_xpath('last_updated',
                          '//div[contains(@id, "apartment-up__last-time")]//text()')
+        loader.add_xpath('owner_type', '(//span[contains(@class, '
+                                       '"apartment-bar__value")]//text())[last()]')
         long, lat = self._extract_coordinates_from_script(response.text)
         url = response.url
         loader.add_value('origin_url', url)

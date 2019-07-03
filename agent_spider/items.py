@@ -25,6 +25,9 @@ class BaseApartmentItem(scrapy.Item):
 
     apartment_type = scrapy.Field()
 
+    owner_type = scrapy.Field()
+    is_owner = scrapy.Field()
+
 
 class RentedApartmentBulletin(BaseApartmentItem):
 

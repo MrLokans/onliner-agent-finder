@@ -50,6 +50,9 @@ class BaseLoader(ItemLoader):
     phones_out = processors.MapCompose("".join)
     address_in = processors.MapCompose(lambda s: s.strip())
     apartment_type_in = processors.MapCompose(lambda s: s.strip())
+
+    owner_type = processors.MapCompose(lambda s: s.strip())
+
     price_BYN_in = processors.MapCompose(lambda s: s.replace('р.', '').replace(',', '.').strip())
     price_USD_in = processors.MapCompose(lambda s: s.replace('$', '').strip())
 
