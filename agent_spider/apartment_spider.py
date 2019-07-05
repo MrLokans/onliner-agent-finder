@@ -17,6 +17,8 @@ logger = logging.getLogger(__name__)
 LONGITUDE_REGEX = re.compile(r'longitude = (?P<longitude>\d+\.\d+),')
 LATITUDE_REGEX = re.compile(r'latitude = (?P<latitude>\d+\.\d+),')
 
+KNOWN_OWNER_TYPES = ('Агентство', 'Собственник', 'Застройщик', )
+
 
 def get_option_field(name: str) -> str:
     return 'has_{field}'.format(field=name)
@@ -82,7 +84,7 @@ class OnlinerApartmentSpider(scrapy.Spider):
 
     def _set_is_owner(self, item):
         type_ = item['owner_type']
-        assert type_ in ['Агентство', 'Собственник']
+        assert type_ in KNOWN_OWNER_TYPES
         item['is_owner'] = type_ == 'Собственник'
         return item
 
