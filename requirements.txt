@@ -1,6 +1,6 @@
-requests<=2.21.0
-Scrapy<=1.6.0
-beautifulsoup4<=4.6.0
+requests<=2.22.0
+Scrapy<=1.7.3
+beautifulsoup4<=4.8.0
 pytest<=3.5.0
 tqdm<=4.31.0
-html2text==2018.1.9
+html2text==2019.8.11
