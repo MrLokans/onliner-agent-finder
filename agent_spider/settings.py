@@ -1,7 +1,8 @@
-ITEM_PIPELINES = {
-    'scrapy.downloadermiddlewares.httpcache.HttpCacheMiddleware': 50,
-}
-HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
-HTTPCACHE_EXPIRATION_SECS = 20 * 60
-HTTPCACHE_ENABLED = True
-LOG_LEVEL = 'INFO'
+LOG_LEVEL = 'ERROR'
+LOG_ENABLED = TrueLOG_ENCODING = 'utf-8'
+LOG_FORMATTER = 'agent_spider.log_formatter.SilentLogFormatter'
+LOG_FORMAT = '%(asctime)s [%(name)s] %(levelname)s: %(message)s'
+LOG_DATEFORMAT = '%Y-%m-%d %H:%M:%S'
+LOG_STDOUT = False
+LOG_FILE = None
+LOG_SHORT_NAMES = False
