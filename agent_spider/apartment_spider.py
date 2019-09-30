@@ -8,8 +8,7 @@ from agent_spider.config import APARTMENT_OPTIONS, SOLD_OPTIONS_INFO_FIELDS, SOL
 from agent_spider.finder import get_apartment_urls
 from agent_spider.items import RentedApartmentBulletin, SoldApartmentBulletin
 from agent_spider.loader import SoldLoader, RentLoader
-from agent_spider.url_cache import URLCacheManager
-
+from agent_spider.url_cache import URLCacheManager, DummyCache
 
 logger = logging.getLogger(__name__)
 
@@ -29,23 +28,15 @@ class OnlinerApartmentSpider(scrapy.Spider):
 
     def __init__(self,
                  url_file=None,
-                 use_cache: bool=True,
+                 url_cache=None,
                  *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._use_cache = use_cache
-        self._init_cache()
+        self.cache_manager = url_cache or DummyCache()
+        self.cache_manager.load_cache()
         self.start_urls = self._get_start_urls(url_file)
 
     def closed(self, *args, **kwargs):
-        if self._use_cache:
-            self.cache_manager.dump_cache()
-
-    def _init_cache(self):
-        if self._use_cache:
-            logger.info('Spider cache is enabled. '
-                        'Initialising cache manager.')
-            self.cache_manager = URLCacheManager()
-            self.cache_manager.load_cache()
+        self.cache_manager.dump_cache()
 
     def _get_start_urls(self, url_file=None):
         if url_file:
@@ -57,9 +48,8 @@ class OnlinerApartmentSpider(scrapy.Spider):
             logger.info("Obtaining URL from onliner website")
             urls = list(get_apartment_urls())
 
-        if self._use_cache:
-            urls = [url for url in urls
-                    if not self.cache_manager.has_url(url)]
+        urls = [url for url in urls
+                if not self.cache_manager.has_url(url)]
         return urls
 
     def _get_option_xpath(self, option_index: int) -> str:
@@ -78,8 +68,7 @@ class OnlinerApartmentSpider(scrapy.Spider):
         loader = self._configure_common_loader(loader, response)
         item = loader.load_item()
         item = self._set_is_owner(item)
-        if self._use_cache:
-            self.cache_manager.add_url(response.url)
+        self.cache_manager.add_url(response.url)
         yield item
 
     def _set_is_owner(self, item):

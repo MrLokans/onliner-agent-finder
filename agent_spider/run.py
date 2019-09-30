@@ -5,8 +5,8 @@ import logging
 
 from scrapy.crawler import CrawlerProcess
 
-from agent_spider.apartment_spider import OnlinerApartmentSpider
 from agent_spider import settings
+from agent_spider.apartment_spider import OnlinerApartmentSpider
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -19,16 +19,16 @@ logging.getLogger('scrapy.*').setLevel(logging.INFO)
 DEFAULT_OUTPUT_FILE = 'bulletins.json'
 
 
-class SpiderLauncher(object):
+class SpiderLauncher:
 
     def __init__(self,
-                 local_settings: dict=None,
-                 use_cache=False,
-                 url_file: str=None):
+                 local_settings: dict = None,
+                 url_cache=None,
+                 url_file: str = None):
         self._settings = self._read_default_settings()
         if local_settings:
             self._settings.update(local_settings)
-        self._use_cache = use_cache
+        self._url_cache = url_cache
         self._url_file = url_file
 
     @staticmethod
@@ -44,10 +44,9 @@ class SpiderLauncher(object):
 
     def run(self):
         process = CrawlerProcess(self._settings)
-
         process.crawl(OnlinerApartmentSpider,
-                      url_file=self._url_file,
-                      use_cache=self._use_cache)
+                      url_cache=self._url_cache,
+                      url_file=self._url_file)
         process.start()
 
 
