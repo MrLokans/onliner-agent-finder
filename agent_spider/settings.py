@@ -1,5 +1,6 @@
 LOG_LEVEL = 'ERROR'
-LOG_ENABLED = TrueLOG_ENCODING = 'utf-8'
+LOG_ENABLED = True
+LOG_ENCODING = 'utf-8'
 LOG_FORMATTER = 'agent_spider.log_formatter.SilentLogFormatter'
 LOG_FORMAT = '%(asctime)s [%(name)s] %(levelname)s: %(message)s'
 LOG_DATEFORMAT = '%Y-%m-%d %H:%M:%S'
