@@ -1,3 +1,4 @@
+import json
 import pickle
 
 from scrapy.exceptions import IgnoreRequest

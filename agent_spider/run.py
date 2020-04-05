@@ -73,8 +73,7 @@ def main():
         'LOG_LEVEL': 'INFO',
     }
     launcher = SpiderLauncher(local_settings=overridden_settings,
-                              url_file=args.url_file,
-                              use_cache=args.use_cache)
+                              url_file=args.url_file)
     launcher.run()
 
 

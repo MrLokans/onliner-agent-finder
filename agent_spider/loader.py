@@ -39,6 +39,12 @@ def parse_square_meters_value(value: str) -> float:
     return float(value.replace('\xa0', ' ').replace('м', '').replace(',', '.').strip())
 
 
+def parse_room_count(value: str) -> int:
+    if value.lower() == 'комната':
+        return 0
+    return int(value[0])
+
+
 class BaseLoader(ItemLoader):
 
     default_output_processor = processors.TakeFirst()
@@ -49,7 +55,9 @@ class BaseLoader(ItemLoader):
                                                  .replace('-', ''))
     phones_out = processors.MapCompose("".join)
     address_in = processors.MapCompose(lambda s: s.strip())
-    apartment_type_in = processors.MapCompose(lambda s: s.strip())
+    apartment_type_in = processors.Join()
+
+    room_count_out = processors.Compose(processors.TakeFirst(), parse_room_count)
 
     owner_type = processors.MapCompose(lambda s: s.strip())
 

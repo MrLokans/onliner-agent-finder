@@ -28,6 +28,10 @@ class BaseApartmentItem(scrapy.Item):
     owner_type = scrapy.Field()
     is_owner = scrapy.Field()
 
+    viewed_times = scrapy.Field()
+
+    room_count = scrapy.Field()
+
 
 class RentedApartmentBulletin(BaseApartmentItem):
 

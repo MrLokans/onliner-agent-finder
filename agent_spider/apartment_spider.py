@@ -101,6 +101,8 @@ class OnlinerApartmentSpider(scrapy.Spider):
                          '//div[contains(@id, "apartment-up__last-time")]//text()')
         loader.add_xpath('owner_type', '(//span[contains(@class, '
                                        '"apartment-bar__value")]//text())[last()]')
+        loader.add_xpath('room_count',
+                         '//span[contains(@class, "apartment-bar__value")]//text()')
         long, lat = self._extract_coordinates_from_script(response.text)
         url = response.url
         loader.add_value('origin_url', url)

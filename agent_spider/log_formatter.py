@@ -14,7 +14,6 @@ SCRAPEDMSG = u"Scraped from %(src)s"
 
 
 class SilentLogFormatter(LogFormatter):
-    
     def scraped(self, item, response, spider):
         """Logs a message when an item is scraped by a spider."""
         if isinstance(response, Failure):
